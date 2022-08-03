@@ -1,62 +1,111 @@
 import React, { useState } from "react";
+import useInput from "../hooks/useInput";
 
 const BasicForm = (props) => {
-  const [student, setSudent] = useState({});
+  // fname
+  const nameValidation = (value) => value.trim() !== "";
+  const {
+    value: fname,
+    isValid: fnameIsValid,
+    hasError: fnameInputHasError,
+    onChangeHandler: fnameInputChangeHandler,
+    onInputBlurHandler: fnameInputBlurHandler,
+    reset,
+  } = useInput(nameValidation);
 
-  const checkInputValidation = (name, value) => {
-    switch (name) {
-      case "name":
-        if (value.trim().length === 0) {
-          alert("Please Enter Valid Name");
-        }
-        return value;
+  // lname
+  const lnameValidation = (value) => value.trim() !== "";
+  const {
+    value: lname,
+    isValid: lnameIsValid,
+    hasError: lnameInputHasError,
+    onChangeHandler: lnameInputChangeHandler,
+    onInputBlurHandler: lnameInputBlurHandler,
+  } = useInput(lnameValidation);
 
-      default:
-        break;
-    }
+  // email
+  const validateEmail = (email) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
   };
-  const onStudentInputChangeHandler = (e) => {
-    const { name, value } = e.target;
-    checkInputValidation();
-    setSudent((prev) => ({ ...prev, [name]: value }));
-  };
+  const {
+    value: email,
+    isValid: emailIsValid,
+    hasError: emailInputHasError,
+    onChangeHandler: emailInputChangeHandler,
+    onInputBlurHandler: emailInputBlurHandler,
+  } = useInput(validateEmail);
+
+  //Form Validity
+  const isFormValid =
+    fnameIsValid && lnameIsValid && emailIsValid ? true : false;
+
   const onSubmitHandler = (e) => {
     e.preventDefault();
-    console.log("student", student);
+    console.log("formcontrolsError", fnameIsValid, lnameIsValid, emailIsValid);
+    if (!isFormValid) return;
+    console.log("studentData", fname, lname, email);
+    reset();
   };
+  const fnameClass = fnameInputHasError
+    ? "form-control invalid"
+    : "form-control";
+  const lnameClass = lnameInputHasError
+    ? "form-control invalid"
+    : "form-control";
+  const emailClass = emailInputHasError
+    ? "form-control invalid"
+    : "form-control";
+
   return (
     <form onSubmit={onSubmitHandler}>
       <div className="control-group">
-        <div className="form-control">
+        <div className={fnameClass}>
           <label htmlFor="fname">First Name</label>
           <input
             type="text"
             id="fname"
             name="fname"
-            onChange={onStudentInputChangeHandler}
+            onChange={fnameInputChangeHandler}
+            value={fname}
+            onBlur={fnameInputBlurHandler}
           />
+          {fnameInputHasError && (
+            <p className="error-text">First Name must not be empty...!</p>
+          )}
         </div>
-        <div className="form-control">
+        <div className={lnameClass}>
           <label htmlFor="lname">Last Name</label>
           <input
             type="text"
             id="lname"
             name="lname"
-            onChange={onStudentInputChangeHandler}
+            onChange={lnameInputChangeHandler}
+            value={lname}
+            onBlur={lnameInputBlurHandler}
           />
+          {lnameInputHasError && (
+            <p className="error-text">Last Name must not be empty...!</p>
+          )}
         </div>
       </div>
-      <div className="form-control">
+      <div className={emailClass}>
         <label htmlFor="email">E-Mail Address</label>
         <input
-          type="email"
+          type="text"
           id="email"
           name="email"
-          onChange={onStudentInputChangeHandler}
+          onChange={emailInputChangeHandler}
+          value={email}
+          onBlur={emailInputBlurHandler}
         />
+        {emailInputHasError && <p className="error-text">Invalid Email...!</p>}
       </div>
       <div className="form-actions">
-        <button>Submit</button>
+        <button disabled={!isFormValid}>Submit</button>
       </div>
     </form>
   );
